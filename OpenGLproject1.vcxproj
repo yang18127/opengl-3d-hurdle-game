@@ -121,10 +121,6 @@
       <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc145-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
     <PostBuildEvent>
       <Command>copy /Y "$(ProjectDir)dlls\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
@@ -159,7 +155,11 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\learnopengl\shader_s.h" />
+    <ClInclude Include="include\game\obstacle.h" />
+    <ClInclude Include="include\game\player.h" />
+    <ClInclude Include="include\learnopengl\mesh.h" />
+    <ClInclude Include="include\learnopengl\model.h" />
+    <ClInclude Include="include\learnopengl\shader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\shader.fs" />
