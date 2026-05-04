@@ -157,13 +157,13 @@
   <ItemGroup>
     <ClInclude Include="include\game\obstacle.h" />
     <ClInclude Include="include\game\player.h" />
-    <ClInclude Include="include\learnopengl\mesh.h" />
     <ClInclude Include="include\learnopengl\model.h" />
-    <ClInclude Include="include\learnopengl\shader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\shader.fs" />
     <None Include="shader\shader.vs" />
+    <None Include="shader\skybox.fs" />
+    <None Include="shader\skybox.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

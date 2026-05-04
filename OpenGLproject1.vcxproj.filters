@@ -29,16 +29,10 @@
     <ClInclude Include="include\game\player.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="include\learnopengl\mesh.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="include\learnopengl\model.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="include\game\obstacle.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="include\learnopengl\shader.h">
+    <ClInclude Include="include\learnopengl\model.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,6 +41,12 @@
       <Filter>shader</Filter>
     </None>
     <None Include="shader\shader.vs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\skybox.vs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\skybox.fs">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>

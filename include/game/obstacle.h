@@ -31,7 +31,7 @@ public :
 	void draw(Shader& shader) {
 		glm::mat4 modelMat = glm::mat4(1.0f);
 		modelMat = glm::translate(modelMat, position);
-		modelMat = glm::scale(modelMat, glm::vec3(0.5f));
+		modelMat = glm::scale(modelMat, glm::vec3(1.5f));
 		shader.setMat4("model", modelMat);
 		model->Draw(shader);
 	}
@@ -40,8 +40,8 @@ public :
 		glm::vec3 pMin = player.getMinBounds();
 		glm::vec3 pMax = player.getMaxBounds();
 
-		glm::vec3 oMin = position - glm::vec3(0.5f);
-		glm::vec3 oMax = position + glm::vec3(0.5f);
+		glm::vec3 oMin = position - glm::vec3(0.5f, 0.3f, 0.15f);
+		glm::vec3 oMax = position + glm::vec3(0.5f, 0.3f, 0.15f);
 
 		bool collisionX = pMin.x <= oMax.x && pMax.x >= oMin.x;
 		bool collisionY = pMin.y <= oMax.y && pMax.y >= oMin.y;
