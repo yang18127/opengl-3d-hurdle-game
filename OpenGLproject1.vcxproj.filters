@@ -18,10 +18,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
+    <ClCompile Include="src\glad.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="src\glad.c">
+    <ClCompile Include="src\main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,18 +35,45 @@
     <ClInclude Include="include\learnopengl\model.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="include\learnopengl\mesh.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\common.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\skeletal\animator.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\skeletal\animation.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\skeletal\animdata.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\skeletal\bone.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\skeletal\assimp_glm_helpers.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\shader.fs">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="shader\shader.vs">
-      <Filter>shader</Filter>
-    </None>
     <None Include="shader\skybox.vs">
       <Filter>shader</Filter>
     </None>
     <None Include="shader\skybox.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\anim.vs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\anim.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\static.vs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\static.fs">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>

@@ -1,13 +1,12 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <common.h>
 #include <learnopengl/shader.h>
 #include <learnopengl/model.h>
 #include <game/player.h>
 
 class Obstacle {
-public :
+public:
 	Model* model;
 	glm::vec3 position;
 	float speed;

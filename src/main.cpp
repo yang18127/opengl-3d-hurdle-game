@@ -1,31 +1,43 @@
-#include <glad/glad.h>
+﻿#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <common.h>
 
 #include <learnopengl/shader.h>
 #include <learnopengl/model.h>
 
 #include <game/player.h>
 #include <game/obstacle.h>
+#include <skeletal/animation.h>
+#include <skeletal/animator.h>
+
 #include <iostream>
+#include <vector>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-Player* player;
-float deltaTime;
-float lastFrame;
+Player* player = nullptr;
+Obstacle* obstacle = nullptr;
+
+Animation* runAnimation = nullptr;
+Animation* jumpAnimation = nullptr;
+Animator* runAnimator = nullptr;
+Animator* jumpAnimator = nullptr;
+Animator* currentAnimator = nullptr;
+
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
+bool isGameOver = false;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 unsigned int loadCubemap(vector<std::string> faces);
 unsigned int loadTexture(char const* path);
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1280;
+const unsigned int SCR_HEIGHT = 800;
 
 int main()
 {
@@ -55,7 +67,62 @@ int main()
     }
     glEnable(GL_DEPTH_TEST);
 
-    float skyboxVertices[] = {         
+    float planeVertices[] = {
+         2.0f, -0.5f,  10.0f,    0.0f, 1.0f, 0.0f,    1.0f,   0.0f,
+        -2.0f, -0.5f,  10.0f,    0.0f, 1.0f, 0.0f,    0.0f,   0.0f,
+        -2.0f, -0.5f, -100.0f,   0.0f, 1.0f, 0.0f,    0.0f,  30.0f,
+
+         2.0f, -0.5f,  10.0f,    0.0f, 1.0f, 0.0f,    1.0f,   0.0f,
+        -2.0f, -0.5f, -100.0f,   0.0f, 1.0f, 0.0f,    0.0f,  30.0f,
+         2.0f, -0.5f, -100.0f,   0.0f, 1.0f, 0.0f,    1.0f,  30.0f,
+
+        -2.0f,  0.0f,  10.0f,    0.0f, 1.0f, 0.0f,    0.05f,  0.0f,
+        -2.2f,  0.0f,  10.0f,    0.0f, 1.0f, 0.0f,    0.00f,  0.0f,
+        -2.2f,  0.0f, -100.0f,   0.0f, 1.0f, 0.0f,    0.00f, 30.0f,
+
+        -2.0f,  0.0f,  10.0f,    0.0f, 1.0f, 0.0f,    0.05f,  0.0f,
+        -2.2f,  0.0f, -100.0f,   0.0f, 1.0f, 0.0f,    0.00f, 30.0f,
+        -2.0f,  0.0f, -100.0f,   0.0f, 1.0f, 0.0f,    0.05f, 30.0f,
+
+        -2.0f,  0.0f,  10.0f,    1.0f, 0.0f, 0.0f,    0.125f, 0.0f,
+        -2.0f, -0.5f,  10.0f,    1.0f, 0.0f, 0.0f,    0.000f, 0.0f,
+        -2.0f, -0.5f, -100.0f,   1.0f, 0.0f, 0.0f,    0.000f, 30.0f,
+
+        -2.0f,  0.0f,  10.0f,    1.0f, 0.0f, 0.0f,    0.125f, 0.0f,
+        -2.0f, -0.5f, -100.0f,   1.0f, 0.0f, 0.0f,    0.000f, 30.0f,
+        -2.0f,  0.0f, -100.0f,   1.0f, 0.0f, 0.0f,    0.125f, 30.0f,
+
+         2.2f,  0.0f,  10.0f,    0.0f, 1.0f, 0.0f,    0.05f,  0.0f,
+         2.0f,  0.0f,  10.0f,    0.0f, 1.0f, 0.0f,    0.00f,  0.0f,
+         2.0f,  0.0f, -100.0f,   0.0f, 1.0f, 0.0f,    0.00f, 30.0f,
+
+         2.2f,  0.0f,  10.0f,    0.0f, 1.0f, 0.0f,    0.05f,  0.0f,
+         2.0f,  0.0f, -100.0f,   0.0f, 1.0f, 0.0f,    0.00f, 30.0f,
+         2.2f,  0.0f, -100.0f,   0.0f, 1.0f, 0.0f,    0.05f, 30.0f,
+
+         2.0f,  0.0f,  10.0f,   -1.0f, 0.0f, 0.0f,    0.125f, 0.0f,
+         2.0f, -0.5f,  10.0f,   -1.0f, 0.0f, 0.0f,    0.000f, 0.0f,
+         2.0f, -0.5f, -100.0f,  -1.0f, 0.0f, 0.0f,    0.000f, 30.0f,
+
+         2.0f,  0.0f,  10.0f,   -1.0f, 0.0f, 0.0f,    0.125f, 0.0f,
+         2.0f, -0.5f, -100.0f,  -1.0f, 0.0f, 0.0f,    0.000f, 30.0f,
+         2.0f,  0.0f, -100.0f,  -1.0f, 0.0f, 0.0f,    0.125f, 30.0f,
+    };
+
+    unsigned int planeVAO, planeVBO;
+    glGenVertexArrays(1, &planeVAO);
+    glGenBuffers(1, &planeVBO);
+    glBindVertexArray(planeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
+    float skyboxVertices[] = {
         -1.0f,  1.0f, -1.0f,
         -1.0f, -1.0f, -1.0f,
          1.0f, -1.0f, -1.0f,
@@ -107,30 +174,7 @@ int main()
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-    unsigned int floorTexture = loadTexture("resources/textures/grass.jpg");
-
-    float planeVertices[] = {
-        25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f, 6.0f,  0.0f,
-       -25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  0.0f,  0.0f,
-       -25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  0.0f, 6.0f,
-
-        25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f, 6.0f,  0.0f,
-       -25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  0.0f, 6.0f,
-        25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f, 6.0f, 6.0f
-    };
-
-    unsigned int planeVAO, planeVBO;
-    glGenVertexArrays(1, &planeVAO);
-    glGenBuffers(1, &planeVBO);
-    glBindVertexArray(planeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    unsigned int floorTexture = loadTexture("resources/textures/stone.jpg");
 
     vector<std::string> faces
     {
@@ -143,23 +187,28 @@ int main()
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
-    Shader ourShader("shader/shader.vs", "shader/shader.fs");
+    Shader animShader("shader/anim.vs", "shader/anim.fs");
     Shader skyboxShader("shader/skybox.vs", "shader/skybox.fs");
+    Shader staticShader("shader/static.vs", "shader/static.fs");
 
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
-    Model playerModel("resources/character/male.fbx");
+    Model playerModel("resources/character/mixx.fbx");
     Model obstacleModel("resources/obstacle/wood-structure-part.obj");
 
-    player = new Player(&playerModel, glm::vec3(0.0f, 0.0f, 0.0f));
-    Obstacle obstacle(&obstacleModel, glm::vec3(0.0f, 0.0f, -20.0f), 10.0f);
+    runAnimation = new Animation("resources/animation/running.fbx", &playerModel);
+    jumpAnimation = new Animation("resources/animation/jumping.fbx", &playerModel);
+    runAnimator = new Animator(runAnimation);
+    jumpAnimator = new Animator(jumpAnimation);
+    currentAnimator = runAnimator;
 
-    glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 4.5f);
+    player = new Player(&playerModel, glm::vec3(0.0f, 0.0f, 0.0f));
+    obstacle = new Obstacle(&obstacleModel, glm::vec3(0.0f, 0.0f, -15.0f), 8.0f);
+
+    glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 5.0f);
     glm::vec3 cameraTarget = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
-    ourShader.use();
 
     lastFrame = glfwGetTime();
 
@@ -171,48 +220,76 @@ int main()
 
         processInput(window);
 
-        player->update(deltaTime);
-        obstacle.update(deltaTime);
+        if (!isGameOver) {
+            player->update(deltaTime);
+            obstacle->update(deltaTime);
 
-        if (obstacle.checkCollision(*player)) {
-            std::cout << "game over" << std::endl;
+            if (!player->isJumping)
+                currentAnimator = runAnimator;
 
+            if (currentAnimator == jumpAnimator)
+                currentAnimator->UpdateAnimation(deltaTime, false);
+            else
+                currentAnimator->UpdateAnimation(deltaTime, true);
+
+            if (obstacle->checkCollision(*player)) {
+                isGameOver = true;
+                std::cout << "게임오버 - 스페이스바로 재시작\n";
+            }
         }
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.4f, 0.7f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        ourShader.use();
 
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
+        glm::vec3 lightDir = glm::vec3(-0.4f, -1.0f, -0.2f);
+        glm::vec3 lightColor = glm::vec3(1.0f);
 
-        ourShader.setMat4("projection", projection);
-        ourShader.setMat4("view", view);
-        ourShader.setVec3("lightDir", glm::vec3(-0.4f, -1.0f, -0.2f));
-        ourShader.setVec3("viewPos", cameraPos);
-        ourShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        staticShader.use();
+        staticShader.setMat4("projection", projection);
+        staticShader.setMat4("view", view);
+        staticShader.setVec3("lightDir", lightDir);
+        staticShader.setVec3("viewPos", cameraPos);
+        staticShader.setVec3("lightColor", lightColor);
+        staticShader.setFloat("time", glfwGetTime());
+
+        if (isGameOver)
+            staticShader.setFloat("obstacleSpeed", 0.0f);
+        else
+            staticShader.setFloat("obstacleSpeed", 8.0f * (30.0f / 110.0f) * 1.25f);
 
         glm::mat4 model = glm::mat4(1.0f);
-        ourShader.setMat4("model", model);
+        staticShader.setMat4("model", model);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, floorTexture);
-        ourShader.setInt("texture_diffuse1", 0);
+        staticShader.setInt("texture_diffuse1", 0.0f);
 
         glBindVertexArray(planeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+        glDrawArrays(GL_TRIANGLES, 0, 30);
 
-        player->draw(ourShader);
+        staticShader.setFloat("obstacleSpeed", 0);
+        obstacle->draw(staticShader);
 
-        glBindTexture(GL_TEXTURE_2D, 0);
-        obstacle.draw(ourShader);
+        animShader.use();
+        animShader.setMat4("projection", projection);
+        animShader.setMat4("view", view);
+        animShader.setVec3("lightDir", lightDir);
+        animShader.setVec3("viewPos", cameraPos);
+        animShader.setVec3("lightColor", lightColor);
+
+        auto transforms = currentAnimator->GetFinalBoneMatrices();
+        auto loc = glGetUniformLocation(animShader.ID, "finalBoneMatrices");
+        glUniformMatrix4fv(loc, transforms.size(), GL_FALSE, glm::value_ptr(transforms[0]));
+
+        player->draw(animShader);
 
         glDepthFunc(GL_LEQUAL);
+
         skyboxShader.use();
-        
-        view = glm::mat4(glm::mat3(glm::lookAt(cameraPos, cameraTarget, cameraUp)));
-        skyboxShader.setMat4("view", view);
+
+        glm::mat4 skyView = glm::mat4(glm::mat3(view));
+        skyboxShader.setMat4("view", skyView);
         skyboxShader.setMat4("projection", projection);
 
         glBindVertexArray(skyboxVAO);
@@ -226,6 +303,12 @@ int main()
         glfwPollEvents();
     }
     delete player;
+    delete obstacle;
+    delete runAnimator;
+    delete jumpAnimator;
+    delete runAnimation;
+    delete jumpAnimation;
+
     glfwTerminate();
     return 0;
 }
@@ -235,9 +318,28 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        if (player != nullptr) player->jump();
+    if (isGameOver) {
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+            player->position = glm::vec3(0.0f, 0.0f, 0.0f);
+            player->isJumping = false;
+            player->yVelocity = 0;
 
+            obstacle->position = glm::vec3(0.0f, 0.0f, -15.0f);
+
+            jumpAnimator->Reset();
+            currentAnimator = runAnimator;
+            isGameOver = false;
+        }
+        return;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        if (!player->isJumping) {
+            player->jump();
+            jumpAnimator->Reset();
+            currentAnimator = jumpAnimator;
+        }
+    }
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)

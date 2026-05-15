@@ -1,12 +1,11 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <common.h>
 #include <learnopengl/shader.h>
 #include <learnopengl/model.h>
 
 class Player {
-public : 
+public:
 	Model* model;
 	glm::vec3 position;
 	float yVelocity;
@@ -23,7 +22,7 @@ public :
 
 	void jump() {
 		if (!isJumping) {
-			yVelocity = 10.0f;
+			yVelocity = 7.0f;
 			isJumping = true;
 		}
 	}
@@ -44,15 +43,12 @@ public :
 	void draw(Shader& shader) {
 		glm::mat4 modelMat = glm::mat4(1.0f);
 		modelMat = glm::translate(modelMat, position);
-		modelMat = glm::scale(modelMat, glm::vec3(0.5f));
-		modelMat = glm::rotate(modelMat, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelMat = glm::scale(modelMat, glm::vec3(0.01f));
 		modelMat = glm::rotate(modelMat, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		shader.setMat4("model", modelMat);
 		model->Draw(shader);
 	}
 
 	glm::vec3 getMinBounds() const { return position - glm::vec3(0.35f, 0.2f, 0.0f); }
-	glm::vec3 getMaxBounds() const { return position + glm::vec3(0.35f, 0.2f, 0.7); }
+	glm::vec3 getMaxBounds() const { return position + glm::vec3(0.35f, 0.2f, 0.0f); }
 };
-
-
